@@ -3,18 +3,30 @@ import { Location } from './types';
 
 // Supabase client configuration
 // These environment variables should be set in .env.local (dev) or Vercel (production)
+// IMPORTANT: In Next.js, NEXT_PUBLIC_ variables are embedded at BUILD TIME
+// If variables are added after build, you MUST rebuild/redeploy
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 // Debug: Log environment variable status (client-side only)
 if (typeof window !== 'undefined') {
-  console.log('🔍 Environment Variables Check:', {
+  const envCheck = {
     hasUrl: !!supabaseUrl,
     hasKey: !!supabaseAnonKey,
     urlLength: supabaseUrl.length,
     keyLength: supabaseAnonKey.length,
-    urlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'empty'
-  });
+    urlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'EMPTY',
+    allEnvKeys: Object.keys(process.env).filter(k => k.includes('SUPABASE')).join(', ') || 'NONE'
+  };
+  console.log('🔍 Environment Variables Check:', envCheck);
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('❌ Environment variables are MISSING at runtime!');
+    console.error('This usually means:');
+    console.error('1. Variables not set in Vercel, OR');
+    console.error('2. Build happened BEFORE variables were added (need to redeploy), OR');
+    console.error('3. Variables not set for Production environment');
+  }
 }
 
 // Create Supabase client only if both variables are set
