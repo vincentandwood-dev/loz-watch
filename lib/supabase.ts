@@ -6,6 +6,23 @@ import { Location } from './types';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
+// Debug: Log if variables are missing (only in browser, not during SSR)
+if (typeof window !== 'undefined') {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('⚠️ Supabase environment variables missing:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey,
+      urlLength: supabaseUrl.length,
+      keyLength: supabaseAnonKey.length
+    });
+  } else {
+    console.log('✅ Supabase environment variables loaded:', {
+      url: supabaseUrl.substring(0, 30) + '...',
+      keyLength: supabaseAnonKey.length
+    });
+  }
+}
+
 // Create Supabase client only if environment variables are set
 // Use placeholder values if not set to prevent errors (client will fail gracefully on queries)
 export const supabase = supabaseUrl && supabaseAnonKey
