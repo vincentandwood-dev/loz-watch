@@ -42,10 +42,8 @@ export async function fetchLocations(): Promise<Location[]> {
       .limit(10000); // High limit to fetch all locations (adjust if you expect more than 10k)
 
     if (error) {
-      // Log error in development only
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching locations:', error);
-      }
+      // Always log errors in production for debugging
+      console.error('Error fetching locations from Supabase:', error);
       return [];
     }
 
@@ -64,10 +62,8 @@ export async function fetchLocations(): Promise<Location[]> {
       isOpen: row.is_open ?? undefined,
     }));
   } catch (error) {
-    // Log error in development only
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Unexpected error fetching locations:', error);
-    }
+    // Always log errors for debugging
+    console.error('Unexpected error fetching locations:', error);
     return [];
   }
 }
