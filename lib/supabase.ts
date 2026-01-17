@@ -2,18 +2,15 @@ import { createClient } from '@supabase/supabase-js';
 import { Location } from './types';
 
 // Supabase client configuration
-// These environment variables should be set in .env.local
+// These environment variables should be set in .env.local (dev) or Vercel (production)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  // Only warn in development - don't expose in production
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('Supabase environment variables are not set. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local');
-  }
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create Supabase client only if environment variables are set
+// Use placeholder values if not set to prevent errors (client will fail gracefully on queries)
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : createClient('https://placeholder.supabase.co', 'placeholder-key');
 
 // Database row type (snake_case)
 interface LocationRow {
@@ -32,6 +29,12 @@ interface LocationRow {
  * @returns Promise<Location[]> Array of location objects
  */
 export async function fetchLocations(): Promise<Location[]> {
+  // Return empty array if Supabase is not configured
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase environment variables are not configured. Locations will not be loaded.');
+    return [];
+  }
+
   try {
     // Fetch all locations - explicitly set a high limit to ensure we get all rows
     // Supabase PostgREST has a default limit, so we set it high to get all locations
