@@ -6,28 +6,14 @@ import { Location } from './types';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Debug: Log if variables are missing (only in browser, not during SSR)
-if (typeof window !== 'undefined') {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('⚠️ Supabase environment variables missing:', {
-      hasUrl: !!supabaseUrl,
-      hasKey: !!supabaseAnonKey,
-      urlLength: supabaseUrl.length,
-      keyLength: supabaseAnonKey.length
-    });
-  } else {
-    console.log('✅ Supabase environment variables loaded:', {
-      url: supabaseUrl.substring(0, 30) + '...',
-      keyLength: supabaseAnonKey.length
-    });
+if (!supabaseUrl || !supabaseAnonKey) {
+  // Only warn in development - don't expose in production
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('Supabase environment variables are not set. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local');
   }
 }
 
-// Create Supabase client only if environment variables are set
-// Use placeholder values if not set to prevent errors (client will fail gracefully on queries)
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : createClient('https://placeholder.supabase.co', 'placeholder-key');
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database row type (snake_case)
 interface LocationRow {
@@ -48,7 +34,8 @@ interface LocationRow {
 export async function fetchLocations(): Promise<Location[]> {
   // Return empty array if Supabase is not configured
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase environment variables are not configured. Locations will not be loaded.');
+    console.warn('⚠️ Supabase environment variables are not configured. Locations will not be loaded.');
+    console.warn('Check that NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in Vercel environment variables.');
     return [];
   }
 
@@ -62,14 +49,21 @@ export async function fetchLocations(): Promise<Location[]> {
       .limit(10000); // High limit to fetch all locations (adjust if you expect more than 10k)
 
     if (error) {
-      // Always log errors in production for debugging
       console.error('Error fetching locations from Supabase:', error);
       return [];
     }
 
     if (!data) {
+      console.warn('No data returned from Supabase locations table');
       return [];
     }
+
+    if (data.length === 0) {
+      console.warn('Supabase locations table is empty');
+      return [];
+    }
+
+    console.log(`✅ Loaded ${data.length} locations from Supabase`);
 
     // Transform database rows to Location interface
     return data.map((row: LocationRow): Location => ({
@@ -82,7 +76,6 @@ export async function fetchLocations(): Promise<Location[]> {
       isOpen: row.is_open ?? undefined,
     }));
   } catch (error) {
-    // Always log errors for debugging
     console.error('Unexpected error fetching locations:', error);
     return [];
   }
