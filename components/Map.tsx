@@ -68,7 +68,7 @@ const getMarkerIcon = (type: LocationType): L.Icon => {
     iconSize: [24, 24],
     iconAnchor: [12, 24],
     popupAnchor: [0, -24],
-  });
+  }) as L.Icon;
 };
 
 // Traffic incident marker icon (distinct from location markers)
@@ -118,7 +118,7 @@ const getIncidentIcon = (severity: 'info' | 'advisory' | 'alert'): L.Icon => {
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
-  });
+  }) as L.Icon;
 };
 
 // Local incident marker icon (distinct from traffic incidents and locations)
@@ -171,7 +171,7 @@ const getLocalIncidentIcon = (severity: 'info' | 'advisory' | 'alert'): L.Icon =
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
-  });
+  }) as L.Icon;
 };
 
 interface LocationPanelProps {

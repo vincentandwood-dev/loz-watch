@@ -246,7 +246,7 @@ export async function fetchLocalIncidents(): Promise<LocalIncident[]> {
           } else {
             // For articles without specific location matches, spread them around the lake area
             // Use a hash of the article ID to create consistent but distributed coordinates
-            const hash = article.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const hash = article.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
             const spread = 0.25; // Spread radius in degrees (~15 miles) - increased to spread incidents better
             // Create more variation by using different hash calculations for lat/lng
             const latOffset = ((hash % 200) - 100) / 400 * spread;

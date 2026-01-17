@@ -124,7 +124,7 @@ export function getHighestSeverity(alerts: WeatherAlert[]): AlertSeverity {
       return 'warning'; // Warning is highest, return immediately
     }
     
-    if (severity === 'watch' && highestSeverity !== 'warning') {
+    if (severity === 'watch') {
       highestSeverity = 'watch';
     }
     
